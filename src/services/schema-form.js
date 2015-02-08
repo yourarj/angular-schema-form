@@ -290,14 +290,25 @@ angular.module('schemaForm').provider('schemaForm',
 
     var service = {};
 
-    service.merge = function(schema, form, ignore, options, readonly) {
+    service.merge = function(schema, form, ignore, options, readonly, overrides) {
       form  = form || ['*'];
       options = options || {};
+      overrides = overrides || [];
 
       // Get readonly from root object
       readonly = readonly || schema.readonly || schema.readOnly;
 
       var stdForm = service.defaults(schema, ignore, options);
+
+      // Do overrides
+      console.log(stdForm, overrides)
+      overrides.forEach(function(f) {
+        // FIXME: normalize keys of the overrides
+        console.log(f)
+        if (f && stdForm.lookup[f.key]) {
+          angular.extend(stdForm.lookup[f.key], f);
+        }
+      });
 
       //simple case, we have a "*", just put the stdForm there
       var idx = form.indexOf('*');
