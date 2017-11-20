@@ -26,6 +26,8 @@ sfSelect, sfBuilder) {
       initialForm: '=sfForm',
       model: '=sfModel',
       options: '=sfOptions',
+      anticipatedModel: '=sfAnticipatedModel',
+      nonMatchCount: '=sfNonMatchCount',
     },
     controller: [ '$scope', function($scope) {
       this.$onInit = function() {
@@ -54,6 +56,9 @@ sfSelect, sfBuilder) {
     transclude: true,
     require: '?form',
     link: function(scope, element, attrs, formCtrl, transclude) {
+
+      //set nonMatchCount to zero
+      scope.nonMatchCount=0;
       // expose form controller on scope so that we don't force authors to use name on form
       scope.formCtrl = formCtrl;
 
@@ -228,6 +233,57 @@ sfSelect, sfBuilder) {
         // keep the model intact. So therefore we set a flag to tell the others it's time to just
         // let it be.
         scope.externalDestructionInProgress = true;
+      });
+
+      scope.$on('schemaFormAnswersAnticipate', function() {
+        console.log("'schemaFormAnswersAnticipate' was triggerred");
+        console.log("anticipated values are");
+        console.log(scope.anticipatedModel);
+
+        //  a class to append to such input container that expected value doesn't match
+        var nonMatchingClass= "bg-danger";
+
+        if(angular.isDefined(scope.anticipatedModel)
+        && null!= scope.anticipatedModel
+        && angular.isObject(scope.anticipatedModel)){
+          for (var index1 in scope.anticipatedModel) {
+            if(scope.anticipatedModel.hasOwnProperty(index1)){
+              var anticipatedAnswer = scope.anticipatedModel[index1];
+              var givenAnswer =scope.model[index1];
+
+              if(anticipatedAnswer!=givenAnswer){
+                  for (var index2 in scope.initialForm) {
+                    if (scope.initialForm.hasOwnProperty(index2)
+                    && angular.isObject(scope.initialForm[index2])
+                    && index1 == scope.initialForm[index2].key) {
+                      if(angular.isUndefined(scope.initialForm[index2]["htmlClass"])
+                      || scope.initialForm[index2]["htmlClass"] == ""){
+                          scope.initialForm[index2]["htmlClass"]=nonMatchingClass;
+                          scope.nonMatchCount++;
+                      } else if (scope.initialForm[index2]["htmlClass"].indexOf(nonMatchingClass)==-1) {
+                          scope.initialForm[index2]["htmlClass"] += " "+nonMatchingClass;
+                          scope.nonMatchCount++;
+                      }
+                    }
+                  }
+              } else {
+                //we are iterating the form to remove if any existing error classes
+                for (var index2 in scope.initialForm) {
+                  if (scope.initialForm.hasOwnProperty(index2)
+                  && angular.isObject(scope.initialForm[index2])
+                  && index1 == scope.initialForm[index2].key) {
+                    if (angular.isDefined(scope.initialForm[index2]["htmlClass"])
+                    && scope.initialForm[index2]["htmlClass"].indexOf(nonMatchingClass)!=-1) {
+                        scope.initialForm[index2]["htmlClass"]
+                          = scope.initialForm[index2]["htmlClass"].replace(nonMatchingClass);
+                          scope.nonMatchCount--;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       });
 
       /**
