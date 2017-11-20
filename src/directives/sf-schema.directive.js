@@ -26,7 +26,7 @@ sfSelect, sfBuilder) {
       initialForm: '=sfForm',
       model: '=sfModel',
       options: '=sfOptions',
-      anticipatedModel: '=sfAnticipatedModel',
+      expectedModel: '=sfExpectedModel',
       nonMatchCount: '=sfNonMatchCount',
     },
     controller: [ '$scope', function($scope) {
@@ -235,23 +235,20 @@ sfSelect, sfBuilder) {
         scope.externalDestructionInProgress = true;
       });
 
-      scope.$on('schemaFormAnswersAnticipate', function() {
-        console.log("'schemaFormAnswersAnticipate' was triggerred");
-        console.log("anticipated values are");
-        console.log(scope.anticipatedModel);
+      scope.$on('schemaFormAnswersExpect', function() {
 
         //  a class to append to such input container that expected value doesn't match
         var nonMatchingClass= "bg-danger";
 
-        if(angular.isDefined(scope.anticipatedModel)
-        && null!= scope.anticipatedModel
-        && angular.isObject(scope.anticipatedModel)){
-          for (var index1 in scope.anticipatedModel) {
-            if(scope.anticipatedModel.hasOwnProperty(index1)){
-              var anticipatedAnswer = scope.anticipatedModel[index1];
+        if(angular.isDefined(scope.expectedModel)
+        && null!= scope.expectedModel
+        && angular.isObject(scope.expectedModel)){
+          for (var index1 in scope.expectedModel) {
+            if(scope.expectedModel.hasOwnProperty(index1)){
+              var expectedAnswer = scope.expectedModel[index1];
               var givenAnswer =scope.model[index1];
 
-              if(anticipatedAnswer!=givenAnswer){
+              if(expectedAnswer!=givenAnswer){
                   for (var index2 in scope.initialForm) {
                     if (scope.initialForm.hasOwnProperty(index2)
                     && angular.isObject(scope.initialForm[index2])
